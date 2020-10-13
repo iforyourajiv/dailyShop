@@ -12,7 +12,7 @@
 			</noscript>
 			
 			<!-- Page Head -->
-			<h2>Welcome John</h2>
+			<h2>Welcome Admin</h2>
 			<p id="page-intro">What would you like to do?</p>
 			
 	
