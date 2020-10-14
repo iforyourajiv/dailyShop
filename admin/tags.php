@@ -1,5 +1,4 @@
 <?php
-session_start();
 require './config.php';
 $noti = "";
 if (isset($_POST['submit'])) {

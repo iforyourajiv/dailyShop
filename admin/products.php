@@ -12,27 +12,36 @@ if (isset($_POST['submit'])) {
     $cat_id = $_POST['category_id'];
     $tag = json_encode($_POST['tag']);
 
-    if (move_uploaded_file($_FILES["file"]["tmp_name"], $filepath)) {
-        $query = "INSERT INTO products(name,price,image,short_desc,long_desc,category_id)
-		VALUES('$product_name','$product_price','$image','$short_description','$long_description','$cat_id')";
-        if (mysqli_query($conn, $query)) {
-            $id = mysqli_insert_id($conn);
-            $query1 = "INSERT INTO products_tags(product_id,tag_id)VALUES('$id','$tag')";
-            if (mysqli_query($conn, $query1)) {
-                $noti .= "<div class='notification success png_bg'>";
-                $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
-                $noti .= "<div>Product Successfully Added</div></div>";
-            } else {
-                $noti .= "<div class='notification error png_bg'>";
-                $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
-                $noti .= "<div>Something Happening Wrong!! Product Not Added</div></div>";
-            }
-        }
+    $query = "select * from products where name='$product_name'";
+    $result = mysqli_query($conn, $query);
+    if (mysqli_num_rows($result) > 0) {
+        $noti .= "<div class='notification attention png_bg'>";
+        $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
+        $noti .= "<div>Product name Already Exist</div></div>";
 
     } else {
-        $noti .= "<div class='notification error png_bg'>";
-        $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
-        $noti .= "<div>Image Not Uploaded </div></div>";
+        if (move_uploaded_file($_FILES["file"]["tmp_name"], $filepath)) {
+            $query = "INSERT INTO products(name,price,image,short_desc,long_desc,category_id)
+			VALUES('$product_name','$product_price','$image','$short_description','$long_description','$cat_id')";
+            if (mysqli_query($conn, $query)) {
+                $id = mysqli_insert_id($conn);
+                $query1 = "INSERT INTO products_tags(product_id,tag_id)VALUES('$id','$tag')";
+                if (mysqli_query($conn, $query1)) {
+                    $noti .= "<div class='notification success png_bg'>";
+                    $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
+                    $noti .= "<div>Product Successfully Added</div></div>";
+                } else {
+                    $noti .= "<div class='notification error png_bg'>";
+                    $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
+                    $noti .= "<div>Something Happening Wrong!! Product Not Added</div></div>";
+                }
+            }
+
+        } else {
+            $noti .= "<div class='notification error png_bg'>";
+            $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
+            $noti .= "<div>Image Not Uploaded </div></div>";
+        }
     }
 
 }
@@ -262,48 +271,44 @@ if (isset($_POST['submit'])) {
 								<p>
 									<label>Product Category</label>
 								<?php
-								require './config.php';
-								$query = "select * from categories";
-								$result = mysqli_query($conn, $query);
-								if (mysqli_num_rows($result) > 0)
-								{
-									$html = "";
-									$html .= "<select name='category_id' class='small-input'>";
-									while ($row = mysqli_fetch_assoc($result))
-									{
-										$category_id = $row['id'];
-										$category_name = $row['name'];
-										$html .= "<option value='$category_id'>$category_name</option>";
+require './config.php';
+$query = "select * from categories";
+$result = mysqli_query($conn, $query);
+if (mysqli_num_rows($result) > 0) {
+    $html = "";
+    $html .= "<select name='category_id' class='small-input'>";
+    while ($row = mysqli_fetch_assoc($result)) {
+        $category_id = $row['id'];
+        $category_name = $row['name'];
+        $html .= "<option value='$category_id'>$category_name</option>";
 
-									}
-									$html .= "</select>";
-									echo $html;
-								}
+    }
+    $html .= "</select>";
+    echo $html;
+}
 
-								?>
+?>
 								</p>
 
 								<p>
 									<label>Tags</label>
 									<?php
-									require './config.php';
-									$query = "select * from tags";
-									$result = mysqli_query($conn, $query);
-									if (mysqli_num_rows($result) > 0)
-									{
-										$tag = "";
-										while ($row = mysqli_fetch_assoc($result))
-										{
-											$tag_id = $row['id'];
-											$tag_name = $row['name'];
+require './config.php';
+$query = "select * from tags";
+$result = mysqli_query($conn, $query);
+if (mysqli_num_rows($result) > 0) {
+    $tag = "";
+    while ($row = mysqli_fetch_assoc($result)) {
+        $tag_id = $row['id'];
+        $tag_name = $row['name'];
 
-											$tag .= "<input type='checkbox' name='tag[]' value='$tag_id' /> $tag_name";
+        $tag .= "<input type='checkbox' name='tag[]' value='$tag_id' /> $tag_name";
 
-										}
-										echo $tag;
-									}
+    }
+    echo $tag;
+}
 
-									?>
+?>
 
 								</p>
 								<p>
