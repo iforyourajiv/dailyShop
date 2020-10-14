@@ -270,43 +270,43 @@ if (isset($_POST['submit'])) {
 
 								<p>
 									<label>Product Category</label>
-								<?php
-require './config.php';
-$query = "select * from categories";
-$result = mysqli_query($conn, $query);
-if (mysqli_num_rows($result) > 0) {
-    $html = "";
-    $html .= "<select name='category_id' class='small-input'>";
-    while ($row = mysqli_fetch_assoc($result)) {
-        $category_id = $row['id'];
-        $category_name = $row['name'];
-        $html .= "<option value='$category_id'>$category_name</option>";
+									<?php
+									require './config.php';
+									$query = "select * from categories";
+									$result = mysqli_query($conn, $query);
+									if (mysqli_num_rows($result) > 0) {
+									$html = "";
+									$html .= "<select name='category_id' class='small-input'>";
+									while ($row = mysqli_fetch_assoc($result)) {
+									$category_id = $row['id'];
+									$category_name = $row['name'];
+									$html .= "<option value='$category_id'>$category_name</option>";
 
-    }
-    $html .= "</select>";
-    echo $html;
-}
+									}
+									$html .= "</select>";
+									echo $html;
+									}
 
-?>
+									?>
 								</p>
 
 								<p>
 									<label>Tags</label>
 									<?php
-require './config.php';
-$query = "select * from tags";
-$result = mysqli_query($conn, $query);
-if (mysqli_num_rows($result) > 0) {
-    $tag = "";
-    while ($row = mysqli_fetch_assoc($result)) {
-        $tag_id = $row['id'];
-        $tag_name = $row['name'];
+									require './config.php';
+									$query = "select * from tags";
+									$result = mysqli_query($conn, $query);
+									if (mysqli_num_rows($result) > 0) {
+									$tag = "";
+									while ($row = mysqli_fetch_assoc($result)) {
+									$tag_id = $row['id'];
+									$tag_name = $row['name'];
 
-        $tag .= "<input type='checkbox' name='tag[]' value='$tag_id' /> $tag_name";
+									$tag .= "<input type='checkbox' name='tag[]' value='$tag_id' /> $tag_name";
 
-    }
-    echo $tag;
-}
+									}
+									echo $tag;
+									}
 
 ?>
 
