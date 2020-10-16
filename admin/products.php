@@ -10,6 +10,8 @@ if (isset($_POST['submit'])) {
     $short_description = $_POST['short_description'];
     $long_description = $_POST['long_description'];
     $cat_id = $_POST['category_id'];
+    $color = $_POST['color'];
+    $quantity = 1;
     $tag = json_encode($_POST['tag']);
 
     $query = "select * from products where name='$product_name'";
@@ -26,10 +28,18 @@ if (isset($_POST['submit'])) {
             if (mysqli_query($conn, $query)) {
                 $id = mysqli_insert_id($conn);
                 $query1 = "INSERT INTO products_tags(product_id,tag_id)VALUES('$id','$tag')";
-                if (mysqli_query($conn, $query1)) {
-                    $noti .= "<div class='notification success png_bg'>";
-                    $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
-                    $noti .= "<div>Product Successfully Added</div></div>";
+                $query2 = "INSERT INTO colors(product_id,color,quantity)VALUES('$id','$color','$quantity')";
+                if (mysqli_multi_query($conn, $query1)) {
+                    if (mysqli_multi_query($conn, $query2)) {
+                        $noti .= "<div class='notification success png_bg'>";
+                        $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
+                        $noti .= "<div>Product Successfully Added</div></div>";
+                    } else {
+                        $noti .= "<div class='notification error png_bg'>";
+                        $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
+                        $noti .= "<div>Failed Product Color Not Added</div></div>";
+
+                    }
                 } else {
                     $noti .= "<div class='notification error png_bg'>";
                     $noti .= "<a href='#' class='close'><img src='resources/images/icons/cross_grey_small.png' title='Close this notification' alt='close' /></a>";
@@ -311,6 +321,23 @@ if (isset($_POST['submit'])) {
 ?>
 
 								</p>
+									<p>
+										<label>Color</label>
+							<select name="color" class="small-input">
+								<option value="black">Black</option>
+								<option value="green">Green</option>
+								<option value="yellow">Yellow</option>
+								<option value="pink">Pink</option>
+								<option value="purple">Purple</option>
+								<option value="blue">Blue</option>
+								<option value="orange">Orange</option>
+								<option value="gray">Gray</option>
+								<option value="white">White</option>
+								<option value="cyan">Cyan</option>
+								<option value="olive">Olive</option>
+								<option value="Orchid">Orchid</option>
+							</select>
+								</p>                          
 								<p>
 									<label>Product Short Description</label>
 										<input class="text-input small-input" type="text" id="small-input" name="short_description" required/>  <!-- Classes for input-notification: success, error, information, attention -->
