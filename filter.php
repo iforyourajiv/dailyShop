@@ -30,7 +30,7 @@ if(isset($_POST['action'])) {
                       $output.='<!-- start single product item -->
                                 <li>
                                 <figure>
-                                <a class="aa-product-img" href="#"><img src="../admin/productImages/'.$product_image.'" alt="<?php echo $product_image ?>" width="225px" height="225px"></a>
+                                <a class="aa-product-img" href="#"><img src="./admin/productImages/'.$product_image.'" alt="<?php echo $product_image ?>" width="225px" height="225px"></a>
                                 <a class="aa-add-card-btn" href="cart.php?id='.$product_id.'"><span class="fa fa-shopping-cart"></span>Add To Cart</a>
                                 <figcaption>
                                 <h4 class="aa-product-title"><a href="#">'.$product_name.' </a></h4>
