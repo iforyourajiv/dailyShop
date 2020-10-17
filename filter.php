@@ -2,6 +2,9 @@
 include './config.php';
 if (isset($_POST['action'])) {
     $choice = $_POST['action'];
+
+     // Category Filter With Ajax 
+
     if ($choice == "category") {
         $cat_id = $_POST['id'];
         $showRecordPerPage = 10;
@@ -52,7 +55,10 @@ if (isset($_POST['action'])) {
             echo $output;
         } else {
             echo "<h2>Product Not Found In This Category</h2>";
-        }
+        } 
+
+        // Tag Filter With Ajax 
+
     } else if ($choice == "tag") {
         $tag_id = $_POST['id'];
         $query = "SELECT * FROM products_tags";
@@ -106,6 +112,8 @@ if (isset($_POST['action'])) {
             echo "<h2>Product Not Found With This Tag</h2>";
         }
 
+        // Price  Filter With Minimum and Maximum Range Ajax 
+
     } else if ($choice == "price") {
         $min = ceil($_POST['minimum_price']);
         $max = ceil($_POST['maximum_price']);
@@ -148,6 +156,9 @@ if (isset($_POST['action'])) {
             echo $min, $max;
             echo "<h2>Product Not Found With This Price Range</h2>";
         }
+
+        // Color Filter With Ajax 
+
     } else if ($choice == "color") {
         $color = $_POST['color_code'];
         $query = "SELECT * FROM colors WHERE color='$color' ";

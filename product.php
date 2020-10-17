@@ -411,13 +411,13 @@ if (empty($_SESSION['store'])) {
             <div class="aa-product-catg-body">
               <ul class="aa-product-catg">
               <?php
-while ($row = mysqli_fetch_assoc($proResult)) {
-    $product_id = $row['product_id'];
-    $product_name = $row['name'];
-    $product_image = $row['image'];
-    $product_price = $row['price'];
-    $product_desc = $row['short_desc'];
-    ?>
+        while ($row = mysqli_fetch_assoc($proResult)) {
+            $product_id = $row['product_id'];
+            $product_name = $row['name'];
+            $product_image = $row['image'];
+            $product_price = $row['price'];
+            $product_desc = $row['short_desc'];
+            ?>
 
             <!-- start single product item -->
                 <li>
@@ -431,7 +431,7 @@ while ($row = mysqli_fetch_assoc($proResult)) {
                     </figcaption>
                   </figure>
                   <div class="aa-product-hvr-content">
-                    <a href="#" data-toggle2="tooltip" data-placement="top" onclick="quickModal(<?php echo $product_id ?>)" title="Quick View" data-toggle="modal" data-target="#quick-view-modal"><span class="fa fa-search"></span></a>
+                    <a href="#" data-toggle2="tooltip" data-placement="top" title="Quick View" data-toggle="modal" data-target="#quick-view-modal"><span class="fa fa-search"></span></a>
                   </div>
                   <span class="aa-badge aa-sale" href="#">SALE!</span>
 
@@ -441,6 +441,8 @@ while ($row = mysqli_fetch_assoc($proResult)) {
               </ul>
                 </div>
               <!-- quick view modal -->
+            
+
               <div class="modal fade" id="quick-view-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
@@ -460,9 +462,9 @@ while ($row = mysqli_fetch_assoc($proResult)) {
                               </div>
                               <div class="simpleLens-thumbnails-container">
                                   <a href="#" class="simpleLens-thumbnail-wrapper"
-                                     data-lens-image="./admin/productImages/<?php echo $product_image ?>"
-                                     data-big-image="./admin/productImages/<?php echo $product_image ?>">
-                                      <img src="./admin/productImages/<?php echo $product_image ?>">
+                                     data-lens-image=""
+                                     data-big-image="">
+                                      <img src="">
                                   </a>
                               </div>
                             </div>
