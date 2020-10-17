@@ -1,5 +1,8 @@
 <?php
 include_once "./config.php";
+if (!isset($_SESSION)) {
+    session_start();
+}
 $showRecordPerPage = 10;
 if (isset($_GET['page']) && !empty($_GET['page'])) {
     $currentPage = $_GET['page'];
@@ -60,7 +63,7 @@ $proResult = mysqli_query($conn, $query1);
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-  
+
 
   </head>
   <!-- !Important notice -->
@@ -164,34 +167,46 @@ $proResult = mysqli_query($conn, $query1);
                   <span class="aa-cart-title">SHOPPING CART</span>
                   <span class="aa-cart-notify">2</span>
                 </a>
-                <div class="aa-cartbox-summary">
-                  <ul>
-                    <li>
-                      <a class="aa-cartbox-img" href="#"><img src="img/woman-small-2.jpg" alt="img"></a>
+                  <?php
+if (empty($_SESSION['store'])) {
+    $noti_cart = '<div class="aa-cartbox-summary">';
+    $noti_cart .= '<h4>cart Empty</h4>';
+    echo $noti_cart;
+} else {
+    $noti_cart = '<div class="aa-cartbox-summary">
+                      <ul>';
+    $_SESSION['total'] = 0;
+    foreach ($_SESSION['store'] as $element) {
+        $cart_id = $element['id'];
+        $cart_productName = $element['product_name'];
+        $cart_productPrice = $element['product_price'];
+        $cart_productImage = $element['image'];
+        $cart_productQuantity = $element['quantity'];
+        $itemTotal = $cart_productQuantity * $cart_productPrice;
+        $_SESSION['total'] = $_SESSION['total'] + $itemTotal;
+        $noti_cart .= ' <li>
+                      <a class="aa-cartbox-img" href="#"><img src="./admin/productImages/' . $cart_productImage . '" alt="img"></a>
                       <div class="aa-cartbox-info">
-                        <h4><a href="#">Product Name</a></h4>
-                        <p>1 x $250</p>
+                        <h4><a href="#">' . $cart_productName . '</a></h4>
+                        <p>' . $cart_productQuantity . ' x' . $itemTotal . '</p>
                       </div>
-                      <a class="aa-remove-product" href="#"><span class="fa fa-times"></span></a>
-                    </li>
-                    <li>
-                      <a class="aa-cartbox-img" href="#"><img src="img/woman-small-1.jpg" alt="img"></a>
-                      <div class="aa-cartbox-info">
-                        <h4><a href="#">Product Name</a></h4>
-                        <p>1 x $250</p>
-                      </div>
-                      <a class="aa-remove-product" href="#"><span class="fa fa-times"></span></a>
-                    </li>
-                    <li>
-                      <span class="aa-cartbox-total-title">
-                        Total
-                      </span>
-                      <span class="aa-cartbox-total-price">
-                        $500
-                      </span>
-                    </li>
+                      <a class="aa-remove-product" href="deleteCart.php?del=' . $cart_id . '"><span class="fa fa-times"></span></a>
+                    </li>';
+        $noti_cart .= '<li>
+                    <span class="aa-cartbox-total-title">
+                      Total
+                    </span>
+                    <span class="aa-cartbox-total-price">
+                     ' . $_SESSION['total'] . '
+                    </span>
+                  </li>';
+
+    }
+    echo $noti_cart;
+}
+?>
                   </ul>
-                  <a class="aa-cartbox-checkout aa-primary-btn" href="#">Checkout</a>
+                  <a class="aa-cartbox-checkout aa-primary-btn" href="saveorder.php">Checkout</a>
                 </div>
               </div>
               <!-- / cart box -->
@@ -396,13 +411,13 @@ $proResult = mysqli_query($conn, $query1);
             <div class="aa-product-catg-body">
               <ul class="aa-product-catg">
               <?php
-                while ($row = mysqli_fetch_assoc($proResult)) {
-                    $product_id = $row['product_id'];
-                    $product_name = $row['name'];
-                    $product_image = $row['image'];
-                    $product_price = $row['price'];
-                    $product_desc = $row['short_desc'];
-                    ?>
+while ($row = mysqli_fetch_assoc($proResult)) {
+    $product_id = $row['product_id'];
+    $product_name = $row['name'];
+    $product_image = $row['image'];
+    $product_price = $row['price'];
+    $product_desc = $row['short_desc'];
+    ?>
 
             <!-- start single product item -->
                 <li>
@@ -416,17 +431,15 @@ $proResult = mysqli_query($conn, $query1);
                     </figcaption>
                   </figure>
                   <div class="aa-product-hvr-content">
-                    <a href="#" data-toggle2="tooltip" data-placement="top" title="Quick View" data-toggle="modal" data-target="#quick-view-modal"><span class="fa fa-search"></span></a>
+                    <a href="#" data-toggle2="tooltip" data-placement="top" onclick="quickModal(<?php echo $product_id ?>)" title="Quick View" data-toggle="modal" data-target="#quick-view-modal"><span class="fa fa-search"></span></a>
                   </div>
                   <span class="aa-badge aa-sale" href="#">SALE!</span>
 
                   <!-- product badge -->
-
+                  <?php }?>
                 </li>
-                <?php }?>
               </ul>
-           </div>
-            
+                </div>
               <!-- quick view modal -->
               <div class="modal fade" id="quick-view-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -440,41 +453,31 @@ $proResult = mysqli_query($conn, $query1);
                             <div class="simpleLens-gallery-container" id="demo-1">
                               <div class="simpleLens-container">
                                   <div class="simpleLens-big-image-container">
-                                      <a class="simpleLens-lens-image" data-lens-image="img/view-slider/large/polo-shirt-1.png">
-                                          <img src="img/view-slider/medium/polo-shirt-1.png" class="simpleLens-big-image">
+                                      <a class="simpleLens-lens-image" data-lens-image="./admin/productImages/<?php echo $product_image ?>">
+                                          <img src="./admin/productImages/<?php echo $product_image ?>" class="simpleLens-big-image">
                                       </a>
                                   </div>
                               </div>
                               <div class="simpleLens-thumbnails-container">
                                   <a href="#" class="simpleLens-thumbnail-wrapper"
-                                     data-lens-image="img/view-slider/large/polo-shirt-1.png"
-                                     data-big-image="img/view-slider/medium/polo-shirt-1.png">
-                                      <img src="img/view-slider/thumbnail/polo-shirt-1.png">
-                                  </a>
-                                  <a href="#" class="simpleLens-thumbnail-wrapper"
-                                     data-lens-image="img/view-slider/large/polo-shirt-3.png"
-                                     data-big-image="img/view-slider/medium/polo-shirt-3.png">
-                                      <img src="img/view-slider/thumbnail/polo-shirt-3.png">
-                                  </a>
-
-                                  <a href="#" class="simpleLens-thumbnail-wrapper"
-                                     data-lens-image="img/view-slider/large/polo-shirt-4.png"
-                                     data-big-image="img/view-slider/medium/polo-shirt-4.png">
-                                      <img src="img/view-slider/thumbnail/polo-shirt-4.png">
+                                     data-lens-image="./admin/productImages/<?php echo $product_image ?>"
+                                     data-big-image="./admin/productImages/<?php echo $product_image ?>">
+                                      <img src="./admin/productImages/<?php echo $product_image ?>">
                                   </a>
                               </div>
                             </div>
                           </div>
                         </div>
+
                         <!-- Modal view content -->
                         <div class="col-md-6 col-sm-6 col-xs-12">
                           <div class="aa-product-view-content">
                             <h3>T-Shirt</h3>
                             <div class="aa-price-block">
-                              <span class="aa-product-view-price">$34.99</span>
+                              <span class="aa-product-view-price"><?php echo $product_image ?></span>
                               <p class="aa-product-avilability">Avilability: <span>In stock</span></p>
                             </div>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis animi, veritatis quae repudiandae quod nulla porro quidem, itaque quis quaerat!</p>
+                            <p><?php echo $product_desclong ?></p>
                             <h4>Size</h4>
                             <div class="aa-prod-view-size">
                               <a href="#">S</a>
@@ -494,7 +497,7 @@ $proResult = mysqli_query($conn, $query1);
                                 </select>
                               </form>
                               <p class="aa-prod-category">
-                                Category: <a href="#">Polo T-Shirt</a>
+                                Category: <a href="#"><?php echo $product_cat ?></a>
                               </p>
                             </div>
                             <div class="aa-prod-view-bottom">
@@ -509,7 +512,10 @@ $proResult = mysqli_query($conn, $query1);
                 </div><!-- /.modal-dialog -->
               </div>
               <!-- / quick view modal -->
+
             </div>
+
+
             <div class="aa-product-catg-pagination">
               <nav>
                 <ul class="pagination">
@@ -538,37 +544,37 @@ $proResult = mysqli_query($conn, $query1);
             </div>
           </div>
         </div>
+
         <div class="col-lg-3 col-md-3 col-sm-4 col-md-pull-9">
           <aside class="aa-sidebar">
             <!-- single sidebar -->
             <div class="aa-sidebar-widget">
               <h3>Category</h3>
               <ul class="aa-catg-nav">
-                <?php 
-                include './config.php';
-                $categorySQL="SELECT * FROM categories";
-                $resultCategory=mysqli_query($conn, $categorySQL);
-                  while($cat=mysqli_fetch_assoc($resultCategory)){
-                    $cat_id=$cat['id'];
-                    ?>
-                    <li><a href='#' data-cat_id='<?php echo $cat_id ?>' class='catid' ><?php echo $cat['name']?> </a></li>
-                 <?php  } ?>
-
-
+                <?php
+include './config.php';
+$categorySQL = "SELECT * FROM categories";
+$resultCategory = mysqli_query($conn, $categorySQL);
+while ($cat = mysqli_fetch_assoc($resultCategory)) {
+    $cat_id = $cat['id'];
+    ?>
+                    <li><a href='#' data-cat_id='<?php echo $cat_id ?>' class='catid' ><?php echo $cat['name'] ?> </a></li>
+                    <?php }?>
               </ul>
             </div>
             <!-- single sidebar -->
             <div class="aa-sidebar-widget">
               <h3>Tags</h3>
               <div class="tag-cloud">
-              <?php 
-                include './config.php';
-                $tagSQL="SELECT * FROM tags";
-                $resultTag=mysqli_query($conn, $tagSQL);
-                  while($tag=mysqli_fetch_assoc($resultTag)){
-                    ?>
-                <a href="?tag_id=<?php echo $tag['id'] ?>"><?php echo $tag['name'] ?></a>
-                <?php  } ?>
+              <?php
+include './config.php';
+$tagSQL = "SELECT * FROM tags";
+$resultTag = mysqli_query($conn, $tagSQL);
+while ($tag = mysqli_fetch_assoc($resultTag)) {
+    $tag_id = $tag['id'];
+    ?>
+                <a href='#' data-tag_id='<?php echo $tag_id ?>' class='tagid'><?php echo $tag['name'] ?></a>
+                <?php }?>
               </div>
             </div>
             <!-- single sidebar -->
@@ -579,9 +585,9 @@ $proResult = mysqli_query($conn, $query1);
                <form action="">
                   <div id="skipstep" class="noUi-target noUi-ltr noUi-horizontal noUi-background">
                   </div>
-                  <span id="skip-value-lower" class="example-val">30.00</span>
-                 <span id="skip-value-upper" class="example-val">100.00</span>
-                 <button class="aa-filter-btn" type="submit">Filter</button>
+                  <span id="skip-value-lower"  class="example-val"></span>
+                 <span id="skip-value-upper"  class="example-val"></span>
+                 <button class="aa-filter-btn" id="filter_price" type="submit">Filter</button>
                </form>
               </div>
 
@@ -590,18 +596,18 @@ $proResult = mysqli_query($conn, $query1);
             <div class="aa-sidebar-widget">
               <h3>Shop By Color</h3>
               <div class="aa-color-tag">
-                <a class="aa-color-green" href="#"></a>
-                <a class="aa-color-yellow" href="#"></a>
-                <a class="aa-color-pink" href="#"></a>
-                <a class="aa-color-purple" href="#"></a>
-                <a class="aa-color-blue" href="#"></a>
-                <a class="aa-color-orange" href="#"></a>
-                <a class="aa-color-gray" href="#"></a>
-                <a class="aa-color-black" href="#"></a>
-                <a class="aa-color-white" href="#"></a>
-                <a class="aa-color-cyan" href="#"></a>
-                <a class="aa-color-olive" href="#"></a>
-                <a class="aa-color-orchid" href="#"></a>
+                <a id="colorgreen" data-color="green"  class="aa-color-green" href="#"></a>
+                <a id="coloryellow" data-color="yellow" class="aa-color-yellow" href="#"></a>
+                <a id="colorpink"  data-color="pink"  class="aa-color-pink" href="#"></a>
+                <a id="colorpurple" data-color="purple" class="aa-color-purple" href="#"></a>
+                <a id="colorblue"  data-color="blue"  class="aa-color-blue" href="#"></a>
+                <a id="colororange" data-color="orange" class="aa-color-orange" href="#"></a>
+                <a id="colorgray"   data-color="gray" class="aa-color-gray" href="#"></a>
+                <a id="colorblack"   data-color="black" class="aa-color-black" href="#"></a>
+                <a id="colorwhite"  data-color="white" class="aa-color-white" href="#"></a>
+                <a id="colorcyan"  data-color="cyan" class="aa-color-cyan" href="#"></a>
+                <a id="colorolive"  data-color="olive" class="aa-color-olive" href="#"></a>
+                <a id="colororchid"  data-color="orchid" class="aa-color-orchid" href="#"></a>
               </div>
             </div>
             <!-- single sidebar -->
@@ -824,7 +830,266 @@ $proResult = mysqli_query($conn, $query1);
                       .done(function(data) {
                         $('#result').html(data);
                       });
-                  })
+                  });
+                  $('.tagid').click(function() {
+                    var id = $(this).data('tag_id');
+                    var action="tag";
+                    $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          id: id,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+                  });
+                  $('#filter_price').click(function() {
+                    var minimum_price = $('#skip-value-lower').html();
+                    var maximum_price = $('#skip-value-upper').html();
+                    var action="price";
+                    $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          minimum_price: minimum_price,
+                          maximum_price: maximum_price,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+                  });
+
+
+                   var color_code="";
+
+                   // green Color
+                   $("#colorgreen").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+                  });
+
+                  // Yellow
+                  $("#coloryellow").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+                  //pink
+                  $("#colorpink").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+                  //purple
+
+                  $("#colorpurple").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+                  //blue
+
+                  $("#colorblue").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+                  // orange
+
+                  $("#colororange").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+                  //gray
+
+                  $("#colorgray").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+                  //black
+
+                  $("#colorblack").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+                  //white
+
+                  $("#colorwhite").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+                  //cyan
+
+                  $("#colorcyan").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+                  //olive
+                  $("#colorolive").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+                  //orchid
+
+                  $("#colororchid").click(function(){
+                   color_code=$(this).data('color');
+                   action="color";
+                   $.ajax({
+                        method: "POST",
+                        url: "filter.php",
+                        data: {
+                          color_code:color_code,
+                          action:action
+                        }
+                      })
+                      .done(function(data) {
+                        $('#result').html(data);
+                      });
+
+                  });
+
+
                 })
               </script>
 
@@ -849,7 +1114,7 @@ $proResult = mysqli_query($conn, $query1);
   <script type="text/javascript" src="js/nouislider.js"></script>
   <!-- Custom js -->
   <script src="js/custom.js"></script>
-  
-  
+
+
   </body>
 </html>

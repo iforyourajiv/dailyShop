@@ -1,19 +1,59 @@
+<?php
+session_start();
+
+include_once './config.php';
+
+if (empty($_SESSION['store'])) {
+    $_SESSION['store'] = array();
+}
+
+if (isset($_GET["id"])) {
+    $id = $_GET["id"];
+    $query = "SELECT * FROM products WHERE product_id='$id'";
+    $result = mysqli_query($conn, $query);
+    $quantity = 1;
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $product_id = $row['product_id'];
+        $product_name = $row['name'];
+        $product_image = $row['image'];
+        $product_price = $row['price'];
+        $found = false;
+    }
+    foreach ($_SESSION['store'] as $element => $data) {
+        if ($data['id'] == $id) {
+            $_SESSION['store'][$element]['quantity'] += 1;
+            $found = true;
+
+        }
+
+    }
+    if (!$found) {
+        $item = array('id' => $product_id, 'product_name' => $product_name, 'product_price' => $product_price, 'quantity' => $quantity, 'image' => $product_image);
+        array_push($_SESSION['store'], $item);
+    }
+
+}
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Daily Shop | Cart Page</title>
-    
+
     <!-- Font awesome -->
     <link href="css/font-awesome.css" rel="stylesheet">
     <!-- Bootstrap -->
-    <link href="css/bootstrap.css" rel="stylesheet">   
+    <link href="css/bootstrap.css" rel="stylesheet">
     <!-- SmartMenus jQuery Bootstrap Addon CSS -->
     <link href="css/jquery.smartmenus.bootstrap.css" rel="stylesheet">
     <!-- Product view slider -->
-    <link rel="stylesheet" type="text/css" href="css/jquery.simpleLens.css">    
+    <link rel="stylesheet" type="text/css" href="css/jquery.simpleLens.css">
     <!-- slick slider -->
     <link rel="stylesheet" type="text/css" href="css/slick.css">
     <!-- price picker slider -->
@@ -24,12 +64,12 @@
     <link href="css/sequence-theme.modern-slide-in.css" rel="stylesheet" media="all">
 
     <!-- Main style sheet -->
-    <link href="css/style.css" rel="stylesheet">    
+    <link href="css/style.css" rel="stylesheet">
 
     <!-- Google Font -->
     <link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
-    
+
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -40,14 +80,14 @@
 
   </head>
   <body>
-   
+
    <!-- wpf loader Two -->
-    <div id="wpf-loader-two">          
+    <div id="wpf-loader-two">
       <div class="wpf-loader-two-inner">
         <span>Loading</span>
       </div>
-    </div> 
-    <!-- / wpf loader Two -->       
+    </div>
+    <!-- / wpf loader Two -->
  <!-- SCROLL TOP BUTTON -->
     <a class="scrollToTop" href="#"><i class="fa fa-chevron-up"></i></a>
   <!-- END SCROLL TOP BUTTON -->
@@ -139,34 +179,47 @@
                   <span class="aa-cart-title">SHOPPING CART</span>
                   <span class="aa-cart-notify">2</span>
                 </a>
-                <div class="aa-cartbox-summary">
-                  <ul>
-                    <li>
-                      <a class="aa-cartbox-img" href="#"><img src="img/woman-small-2.jpg" alt="img"></a>
+
+                <?php
+if (empty($_SESSION['store'])) {
+    $noti_cart = '<div class="aa-cartbox-summary">';
+    $noti_cart .= '<h4>cart Empty</h4>';
+    echo $noti_cart;
+} else {
+    $noti_cart = '<div class="aa-cartbox-summary">
+                      <ul>';
+    $_SESSION['total'] = 0;
+    foreach ($_SESSION['store'] as $element) {
+        $cart_id = $element['id'];
+        $cart_productName = $element['product_name'];
+        $cart_productPrice = $element['product_price'];
+        $cart_productImage = $element['image'];
+        $cart_productQuantity = $element['quantity'];
+        $itemTotal = $cart_productQuantity * $cart_productPrice;
+        $_SESSION['total'] = $_SESSION['total'] + $itemTotal;
+        $noti_cart .= ' <li>
+                      <a class="aa-cartbox-img" href="#"><img src="./admin/productImages/' . $cart_productImage . '" alt="img"></a>
                       <div class="aa-cartbox-info">
-                        <h4><a href="#">Product Name</a></h4>
-                        <p>1 x $250</p>
+                        <h4><a href="#">' . $cart_productName . '</a></h4>
+                        <p>' . $cart_productQuantity . ' x' . $itemTotal . '</p>
                       </div>
-                      <a class="aa-remove-product" href="#"><span class="fa fa-times"></span></a>
-                    </li>
-                    <li>
-                      <a class="aa-cartbox-img" href="#"><img src="img/woman-small-1.jpg" alt="img"></a>
-                      <div class="aa-cartbox-info">
-                        <h4><a href="#">Product Name</a></h4>
-                        <p>1 x $250</p>
-                      </div>
-                      <a class="aa-remove-product" href="#"><span class="fa fa-times"></span></a>
-                    </li>                    
-                    <li>
-                      <span class="aa-cartbox-total-title">
-                        Total
-                      </span>
-                      <span class="aa-cartbox-total-price">
-                        $500
-                      </span>
-                    </li>
+                      <a class="aa-remove-product" href="deleteCart.php?del=' . $cart_id . '"><span class="fa fa-times"></span></a>
+                    </li>';
+        $noti_cart .= '<li>
+                    <span class="aa-cartbox-total-title">
+                      Total
+                    </span>
+                    <span class="aa-cartbox-total-price">
+                     ' . $_SESSION['total'] . '
+                    </span>
+                  </li>';
+
+    }
+    echo $noti_cart;
+}
+?>
                   </ul>
-                  <a class="aa-cartbox-checkout aa-primary-btn" href="#">Checkout</a>
+                  <a class="aa-cartbox-checkout aa-primary-btn" href="saveorder.php">Checkout</a>
                 </div>
               </div>
               <!-- / cart box -->
@@ -177,7 +230,7 @@
                   <button type="submit"><span class="fa fa-search"></span></button>
                 </form>
               </div>
-              <!-- / search box -->             
+              <!-- / search box -->
             </div>
           </div>
         </div>
@@ -198,18 +251,18 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
-            </button>          
+            </button>
           </div>
           <div class="navbar-collapse collapse">
             <!-- Left nav -->
             <ul class="nav navbar-nav">
               <li><a href="index.html">Home</a></li>
               <li><a href="#">Men <span class="caret"></span></a>
-                <ul class="dropdown-menu">                
+                <ul class="dropdown-menu">
                   <li><a href="#">Casual</a></li>
                   <li><a href="#">Sports</a></li>
                   <li><a href="#">Formal</a></li>
-                  <li><a href="#">Standard</a></li>                                                
+                  <li><a href="#">Standard</a></li>
                   <li><a href="#">T-Shirts</a></li>
                   <li><a href="#">Shirts</a></li>
                   <li><a href="#">Jeans</a></li>
@@ -218,18 +271,18 @@
                     <ul class="dropdown-menu">
                       <li><a href="#">Sleep Wear</a></li>
                       <li><a href="#">Sandals</a></li>
-                      <li><a href="#">Loafers</a></li>                                      
+                      <li><a href="#">Loafers</a></li>
                     </ul>
                   </li>
                 </ul>
               </li>
               <li><a href="#">Women <span class="caret"></span></a>
-                <ul class="dropdown-menu">  
-                  <li><a href="#">Kurta & Kurti</a></li>                                                                
-                  <li><a href="#">Trousers</a></li>              
+                <ul class="dropdown-menu">
+                  <li><a href="#">Kurta & Kurti</a></li>
+                  <li><a href="#">Trousers</a></li>
                   <li><a href="#">Casual</a></li>
                   <li><a href="#">Sports</a></li>
-                  <li><a href="#">Formal</a></li>                
+                  <li><a href="#">Formal</a></li>
                   <li><a href="#">Sarees</a></li>
                   <li><a href="#">Shoes</a></li>
                   <li><a href="#">And more.. <span class="caret"></span></a>
@@ -243,7 +296,7 @@
                           <li><a href="#">Earrings</a></li>
                           <li><a href="#">Jewellery Sets</a></li>
                           <li><a href="#">Lockets</a></li>
-                          <li class="disabled"><a class="disabled" href="#">Disabled item</a></li>                       
+                          <li class="disabled"><a class="disabled" href="#">Disabled item</a></li>
                           <li><a href="#">Jeans</a></li>
                           <li><a href="#">Polo T-Shirts</a></li>
                           <li><a href="#">SKirts</a></li>
@@ -256,21 +309,21 @@
                           <li><a href="#">Hand Bags</a></li>
                           <li><a href="#">Single Bags</a></li>
                           <li><a href="#">Travel Bags</a></li>
-                          <li><a href="#">Wallets & Belts</a></li>                        
+                          <li><a href="#">Wallets & Belts</a></li>
                           <li><a href="#">Sunglases</a></li>
-                          <li><a href="#">Nail</a></li>                       
+                          <li><a href="#">Nail</a></li>
                         </ul>
-                      </li>                   
+                      </li>
                     </ul>
                   </li>
                 </ul>
               </li>
               <li><a href="#">Kids <span class="caret"></span></a>
-                <ul class="dropdown-menu">                
+                <ul class="dropdown-menu">
                   <li><a href="#">Casual</a></li>
                   <li><a href="#">Sports</a></li>
                   <li><a href="#">Formal</a></li>
-                  <li><a href="#">Standard</a></li>                                                
+                  <li><a href="#">Standard</a></li>
                   <li><a href="#">T-Shirts</a></li>
                   <li><a href="#">Shirts</a></li>
                   <li><a href="#">Jeans</a></li>
@@ -279,46 +332,46 @@
                     <ul class="dropdown-menu">
                       <li><a href="#">Sleep Wear</a></li>
                       <li><a href="#">Sandals</a></li>
-                      <li><a href="#">Loafers</a></li>                                      
+                      <li><a href="#">Loafers</a></li>
                     </ul>
                   </li>
                 </ul>
               </li>
               <li><a href="#">Sports</a></li>
              <li><a href="#">Digital <span class="caret"></span></a>
-                <ul class="dropdown-menu">                
+                <ul class="dropdown-menu">
                   <li><a href="#">Camera</a></li>
                   <li><a href="#">Mobile</a></li>
                   <li><a href="#">Tablet</a></li>
-                  <li><a href="#">Laptop</a></li>                                                
-                  <li><a href="#">Accesories</a></li>                
+                  <li><a href="#">Laptop</a></li>
+                  <li><a href="#">Accesories</a></li>
                 </ul>
               </li>
-              <li><a href="#">Furniture</a></li>            
+              <li><a href="#">Furniture</a></li>
                <li><a href="blog-archive.html">Blog <span class="caret"></span></a>
-                <ul class="dropdown-menu">                
+                <ul class="dropdown-menu">
                   <li><a href="blog-archive.html">Blog Style 1</a></li>
                   <li><a href="blog-archive-2.html">Blog Style 2</a></li>
-                  <li><a href="blog-single.html">Blog Single</a></li>                
+                  <li><a href="blog-single.html">Blog Single</a></li>
                 </ul>
               </li>
               <li><a href="contact.html">Contact</a></li>
               <li><a href="#">Pages <span class="caret"></span></a>
-                <ul class="dropdown-menu">                
+                <ul class="dropdown-menu">
                   <li><a href="product.html">Shop Page</a></li>
-                  <li><a href="product-detail.html">Shop Single</a></li>                
-                  <li><a href="404.html">404 Page</a></li>                
+                  <li><a href="product-detail.html">Shop Single</a></li>
+                  <li><a href="404.html">404 Page</a></li>
                 </ul>
               </li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
-      </div> 
+      </div>
       </div>
     </div>
   </section>
-  <!-- / menu -->  
- 
+  <!-- / menu -->
+
   <!-- catg header banner section -->
   <section id="aa-catg-head-banner">
    <img src="img/fashion/fashion-header-bg-8.jpg" alt="fashion img">
@@ -327,7 +380,7 @@
       <div class="aa-catg-head-banner-content">
         <h2>Cart Page</h2>
         <ol class="breadcrumb">
-          <li><a href="index.html">Home</a></li>                   
+          <li><a href="index.php">Home</a></li>
           <li class="active">Cart</li>
         </ol>
       </div>
@@ -357,37 +410,36 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td><a class="remove" href="#"><fa class="fa fa-close"></fa></a></td>
-                        <td><a href="#"><img src="img/man/polo-shirt-1.png" alt="img"></a></td>
-                        <td><a class="aa-cart-title" href="#">Polo T-Shirt</a></td>
-                        <td>$250</td>
-                        <td><input class="aa-cart-quantity" type="number" value="1"></td>
-                        <td>$250</td>
-                      </tr>
-                      <tr>
-                        <td><a class="remove" href="#"><fa class="fa fa-close"></fa></a></td>
-                        <td><a href="#"><img src="img/man/polo-shirt-2.png" alt="img"></a></td>
-                        <td><a class="aa-cart-title" href="#">Polo T-Shirt</a></td>
-                        <td>$150</td>
-                        <td><input class="aa-cart-quantity" type="number" value="1"></td>
-                        <td>$150</td>
-                      </tr>
-                      <tr>
-                        <td><a class="remove" href="#"><fa class="fa fa-close"></fa></a></td>
-                        <td><a href="#"><img src="img/man/polo-shirt-3.png" alt="img"></a></td>
-                        <td><a class="aa-cart-title" href="#">Polo T-Shirt</a></td>
-                        <td>$50</td>
-                        <td><input class="aa-cart-quantity" type="number" value="1"></td>
-                        <td>$50</td>
-                      </tr>
+                      <?php
+$show = "";
+$_SESSION['total'] = 0;
+foreach ($_SESSION['store'] as $element) {
+    $cart_id = $element['id'];
+    $cart_productName = $element['product_name'];
+    $cart_productPrice = $element['product_price'];
+    $cart_productImage = $element['image'];
+    $cart_productQuantity = $element['quantity'];
+    $itemTotal = $cart_productQuantity * $cart_productPrice;
+    $_SESSION['total'] = $_SESSION['total'] + $itemTotal;
+    $show .= '<tr>
+                            <td><a class="remove" href="deleteCart.php?del=' . $cart_id . '"><fa class="fa fa-close"></fa></a></td>
+                            <td><a href="#"><img src="./admin/productImages/' . $cart_productImage . '" alt="img"></a></td>
+                            <td><a class="aa-cart-title" href="#">' . $cart_productName . '</a></td>
+                            <td>' . $cart_productPrice . '</td>
+                            <td><input class="aa-cart-quantity" type="number" value="' . $cart_productQuantity . '"></td>
+                            <td> ' . $itemTotal . ' </td>
+                           </tr>';
+}
+echo $show;
+?>
+
                       <tr>
                         <td colspan="6" class="aa-cart-view-bottom">
                           <div class="aa-cart-coupon">
                             <input class="aa-coupon-code" type="text" placeholder="Coupon">
                             <input class="aa-cart-view-btn" type="submit" value="Apply Coupon">
                           </div>
-                          <input class="aa-cart-view-btn" type="submit" value="Update Cart">
+                          <input class="aa-cart-view-btn" id="#update" data-id="$cart_id" type="submit" value="Update Cart">
                         </td>
                       </tr>
                       </tbody>
@@ -401,15 +453,15 @@
                  <tbody>
                    <tr>
                      <th>Subtotal</th>
-                     <td>$450</td>
+                     <td><?php echo $_SESSION['total'] ?></td>
                    </tr>
                    <tr>
                      <th>Total</th>
-                     <td>$450</td>
+                     <td><?php echo $_SESSION['total'] ?></td>
                    </tr>
                  </tbody>
                </table>
-               <a href="#" class="aa-cart-view-btn">Proced to Checkout</a>
+               <a href="saveorder.php" class="aa-cart-view-btn">Proced to Checkout</a>
              </div>
            </div>
          </div>
@@ -439,7 +491,7 @@
   </section>
   <!-- / Subscribe section -->
 
-  <!-- footer -->  
+  <!-- footer -->
   <footer id="aa-footer">
     <!-- footer bottom -->
     <div class="aa-footer-top">
@@ -532,10 +584,10 @@
     </div>
   </footer>
   <!-- / footer -->
-  <!-- Login Modal -->  
+  <!-- Login Modal -->
   <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">                      
+      <div class="modal-content">
         <div class="modal-body">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
           <h4>Login or Register</h4>
@@ -551,24 +603,33 @@
               Don't have an account?<a href="account.html">Register now!</a>
             </div>
           </form>
-        </div>                        
+        </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
   </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+              <script>
+
+                           $(document).ready(function(){
+                              $("update").click(function(){
+                               var= $('.aa-cart-quantity').val();
+                              });
+                           });
+
+                          </script>
 
 
-    
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.js"></script>  
+    <script src="js/bootstrap.js"></script>
     <!-- SmartMenus jQuery plugin -->
     <script type="text/javascript" src="js/jquery.smartmenus.js"></script>
     <!-- SmartMenus jQuery Bootstrap Addon -->
-    <script type="text/javascript" src="js/jquery.smartmenus.bootstrap.js"></script>  
+    <script type="text/javascript" src="js/jquery.smartmenus.bootstrap.js"></script>
     <!-- To Slider JS -->
     <script src="js/sequence.js"></script>
-    <script src="js/sequence-theme.modern-slide-in.js"></script>  
+    <script src="js/sequence-theme.modern-slide-in.js"></script>
     <!-- Product view slider -->
     <script type="text/javascript" src="js/jquery.simpleGallery.js"></script>
     <script type="text/javascript" src="js/jquery.simpleLens.js"></script>
@@ -577,7 +638,7 @@
     <!-- Price picker slider -->
     <script type="text/javascript" src="js/nouislider.js"></script>
     <!-- Custom js -->
-    <script src="js/custom.js"></script> 
+    <script src="js/custom.js"></script>
 
   </body>
 </html>
